@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memory Match</title>
+<style>
+:root{--bg2:#3a2515;--btn1:#7a5230;--btn2:#53351c;--bd:#9a7040;--sel:#1b110a;--bgfull:radial-gradient(ellipse at top,#3a2515,#1d130c 70%) fixed;--bg:#1d130c;--panel:#2a1c11;--ink:#f1e4c8;--mute:#b79d73;--gold:#d4a84b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bgfull);color:var(--ink);font-family:'Cormorant Garamond',Georgia,serif;min-height:100vh;display:flex;justify-content:center;padding:16px}
+.wrap{width:min(100%,460px);text-align:center}
+h1{color:var(--gold);margin:.4rem 0;font-size:2.2rem}
+#hud{display:flex;justify-content:space-around;font-size:1.4rem;margin-bottom:12px}
+#board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:12px;border-radius:8px;background:linear-gradient(135deg,#6b4423,#3d2412 50%,#6b4423)}
+.c{aspect-ratio:1/1;border:0;border-radius:6px;font-size:min(11vw,3rem);cursor:pointer;background:linear-gradient(var(--btn1),var(--btn2));color:transparent;border:1px solid var(--bd);transition:transform .2s}
+.c.up{background:#f1e4c8;color:#000;transform:rotateY(0)}
+.c.done{background:#b7d9a8;color:#000}
+.c:focus-visible{outline:2px solid var(--gold)}
+button.n{margin-top:12px;background:linear-gradient(var(--btn1),var(--btn2));color:var(--ink);border:1px solid var(--bd);border-radius:6px;padding:10px 24px;font:inherit;font-weight:700;font-size:1.3rem;cursor:pointer}
+#msg{font-size:1.6rem;color:var(--gold);min-height:2rem;margin-top:10px}
+</style></head><body><div class="wrap">
+<h1>Memory Match</h1>
+<div id="hud"><div>Moves: <b id="mv">0</b></div><div>Time: <b id="tm">0</b>s</div></div>
+<div id="board"></div><div id="msg"></div><button class="n" id="new">New game</button>
+</div>
+<script>
+const $=id=>document.getElementById(id),E=['♞','♛','♜','♝','♚','♟','⚔','🏆'];
+let first=null,lock=false,moves=0,pairs=0,t=0,iv;
+let A;function beep(f,d){if(window.GR_MUTE)return;try{A=A||new(window.AudioContext||window.webkitAudioContext)();if(A.state==='suspended')A.resume();const o=A.createOscillator(),g=A.createGain();o.frequency.value=f;g.gain.setValueAtTime(.15,A.currentTime);g.gain.exponentialRampToValueAtTime(.001,A.currentTime+d);o.connect(g).connect(A.destination);o.start();o.stop(A.currentTime+d)}catch(e){}}
+function start(){clearInterval(iv);first=null;lock=false;moves=0;pairs=0;t=0;$('mv').textContent=0;$('tm').textContent=0;$('msg').textContent='';
+ const d=[...E,...E].sort(()=>Math.random()-.5);$('board').innerHTML=d.map(v=>`<button class="c" data-v="${v}" aria-label="Card">${v}</button>`).join('');
+ iv=setInterval(()=>$('tm').textContent=++t,1000)}
+$('board').onclick=e=>{const c=e.target.closest('.c');if(!c||lock||c.classList.contains('up')||c.classList.contains('done'))return;
+ c.classList.add('up');beep(500,.08);if(!first){first=c;return}
+ moves++;$('mv').textContent=moves;
+ if(first.dataset.v===c.dataset.v){first.classList.replace('up','done');c.classList.replace('up','done');first=null;beep(780,.15);
+  if(++pairs===8){clearInterval(iv);$('msg').textContent='You won in '+moves+' moves and '+t+' seconds!';beep(988,.4)}}
+ else{lock=true;setTimeout(()=>{first.classList.remove('up');c.classList.remove('up');first=null;lock=false},700)}};
+$('new').onclick=start;start();
+</script><script>addEventListener('message',function(e){var d=e.data;if(!d||d.type!=='cfg')return;var r=document.documentElement.style;for(var k in d.vars)r.setProperty(k,d.vars[k]);window.GR_MUTE=d.mute});try{parent.postMessage({type:'ready'},'*')}catch(e){}</script>
+</body></html>

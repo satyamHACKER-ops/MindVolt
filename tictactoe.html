@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Tic-Tac-Toe</title>
+<style>
+:root{--bg2:#3a2515;--btn1:#7a5230;--btn2:#53351c;--bd:#9a7040;--sel:#1b110a;--bgfull:radial-gradient(ellipse at top,#3a2515,#1d130c 70%) fixed;--bg:#1d130c;--panel:#2a1c11;--ink:#f1e4c8;--mute:#b79d73;--gold:#d4a84b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bgfull);color:var(--ink);font-family:Georgia,serif;min-height:100vh;display:flex;justify-content:center;padding:16px}
+.wrap{width:min(100%,420px);text-align:center}h1{color:var(--gold);margin:.4rem 0}
+select{width:100%;background:var(--sel);color:var(--ink);border:1px solid #6b4a2a;border-radius:4px;padding:10px;font:inherit;margin-bottom:10px}
+#b{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px;border-radius:8px;background:linear-gradient(135deg,#6b4423,#3d2412 50%,#6b4423)}
+.c{aspect-ratio:1/1;font-size:min(18vw,4.5rem);font-weight:700;background:#ecd8b0;border:0;border-radius:6px;cursor:pointer;font-family:inherit}
+.c.X{color:#17100a}.c.O{color:#b3261e}.c.w{background:#b7d9a8}
+.c:focus-visible,button:focus-visible{outline:2px solid var(--gold)}
+#s{font-size:1.4rem;margin:12px 0;min-height:2rem;color:var(--gold)}#t{color:var(--mute)}
+button.n{background:linear-gradient(var(--btn1),var(--btn2));color:var(--ink);border:1px solid var(--bd);border-radius:6px;padding:10px 24px;font:inherit;font-weight:700;cursor:pointer}
+</style></head><body><div class="wrap"><h1>Tic-Tac-Toe</h1>
+<select id="m" aria-label="Mode"><option value="e">You (X) vs Computer: easy</option><option value="h">You (X) vs Computer: unbeatable</option><option value="2">Two players</option></select>
+<div id="b"></div><div id="s"></div><div id="t"></div><button class="n" id="n">New round</button></div>
+<script>
+const $=id=>document.getElementById(id),L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+let b,turn,done,sc={X:0,O:0,D:0};
+const win=b=>L.find(([a,c,d])=>b[a]&&b[a]===b[c]&&b[a]===b[d]);
+function mm(b,p){const w=win(b);if(w)return b[w[0]]==='O'?1:-1;if(!b.includes(''))return 0;let r=p==='O'?-2:2;
+ for(let i=0;i<9;i++)if(!b[i]){b[i]=p;const v=mm(b,p==='O'?'X':'O');b[i]='';r=p==='O'?Math.max(r,v):Math.min(r,v)}return r}
+function ai(){const e=[...Array(9).keys()].filter(i=>!b[i]);if($('m').value==='e'&&Math.random()<.6)return e[Math.random()*e.length|0];
+ let best=-2,pick=[];for(const i of e){b[i]='O';const v=mm(b,'X');b[i]='';if(v>best){best=v;pick=[i]}else if(v===best)pick.push(i)}return pick[Math.random()*pick.length|0]}
+function draw(){$('b').innerHTML=b.map((v,i)=>`<button class="c ${v}" data-i="${i}" aria-label="Square ${i+1}">${v}</button>`).join('');
+ const w=win(b);if(w)w.forEach(i=>$('b').children[i].classList.add('w'));
+ $('t').textContent='X: '+sc.X+'   O: '+sc.O+'   Draws: '+sc.D}
+function mv(i){if(done||b[i])return;b[i]=turn;const w=win(b);
+ if(w){done=1;sc[turn]++;$('s').textContent=turn+' wins!'}else if(!b.includes('')){done=1;sc.D++;$('s').textContent='Draw'}
+ else{turn=turn==='X'?'O':'X';$('s').textContent=turn+' to move'}draw();
+ if(!done&&turn==='O'&&$('m').value!=='2')setTimeout(()=>mv(ai()),350)}
+$('b').onclick=e=>{const c=e.target.closest('.c');if(c&&!(turn==='O'&&$('m').value!=='2'))mv(+c.dataset.i)};
+function start(){b=Array(9).fill('');turn='X';done=0;$('s').textContent='X to move';draw()}
+$('n').onclick=start;$('m').onchange=()=>{sc={X:0,O:0,D:0};start()};start();
+</script><script>addEventListener('message',function(e){var d=e.data;if(!d||d.type!=='cfg')return;var r=document.documentElement.style;for(var k in d.vars)r.setProperty(k,d.vars[k]);window.GR_MUTE=d.mute});try{parent.postMessage({type:'ready'},'*')}catch(e){}</script>
+</body></html>
